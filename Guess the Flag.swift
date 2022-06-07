@@ -17,6 +17,7 @@ struct ContentView: View {
     }
     
     @State private var flagsAnimate = false
+    @State private var userTapped = -1
     
     var body: some View {
         ZStack {
@@ -44,8 +45,8 @@ struct ContentView: View {
                         } label: {
                             FlagImage(flag: countries[number])
                         }
-                        .rotation3DEffect(.degrees((flagsAnimate && number == correctAnswer) ? 360 : 0), axis: (x: 0, y: 1, z: 0))
-                        .blur(radius: (flagsAnimate && number != correctAnswer) ? 6 : 0)
+                        .modifier(
+                            FlagAnimation(run: flagsAnimate, tapped: number == userTapped, right: number == correctAnswer))
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -81,6 +82,7 @@ struct ContentView: View {
             score.wrong += 1
         }
         withAnimation{
+            userTapped = number
             flagsAnimate = true
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -88,6 +90,7 @@ struct ContentView: View {
         }
     }
     func askQuestion() {
+        userTapped = -1
         flagsAnimate = false
         usedCountries.insert(countries[correctAnswer])
         while usedCountries.contains(countries[correctAnswer]) {
@@ -114,25 +117,15 @@ struct FlagImage: View {
     }
 }
 
-struct FlagAnimationRight: ViewModifier {
+struct FlagAnimation: ViewModifier {
     let run: Bool
+    let tapped: Bool
+    let right: Bool
     func body(content: Content) -> some View {
-        if run{
-            content
-                .rotation3DEffect(.degrees(run ? 0 : 200), axis: (x: 0, y: 1, z: 0))
-        } else {
-            content
-        }
+        content
+            .opacity((run && !right) ? 0.25 : 1)
+            .rotation3DEffect(.degrees(run && tapped ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+            .scaleEffect((run && !tapped) ? 0.75 : 1, anchor: .center)
     }
 }
-struct FlagAnimationWrong: ViewModifier {
-    let run: Bool
-    func body(content: Content) -> some View {
-        if run {
-            content
-                .blur(radius: 4)
-        } else {
-            content
-        }
-    }
-}
+
