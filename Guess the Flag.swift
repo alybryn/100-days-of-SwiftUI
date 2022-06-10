@@ -124,7 +124,7 @@ struct FlagAnimation: ViewModifier {
     func body(content: Content) -> some View {
         content
             .opacity((run && !right) ? 0.25 : 1)
-            .rotation3DEffect(.degrees(run && tapped ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+            .rotation3DEffect(.degrees(run && tapped ? 360 : 0), axis: (x: 1, y: 1, z: 0))
             .scaleEffect((run && !tapped) ? 0.75 : 1, anchor: .center)
     }
 }
